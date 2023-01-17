@@ -2,6 +2,7 @@ package com.kaka.SpringBootRocketMQ.consumer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
+import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Component;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 //消息有序消费还是并发消费则由consumeMode属性定制
 //消息过滤可以由里面的selectorType属性和selectorExpression来定制
-@RocketMQMessageListener(topic = "calSquareTopic", consumerGroup = "springBootGroup",
+@RocketMQMessageListener(topic = "calSquareTopic", consumerGroup = "springBootGroup",enableMsgTrace = true,messageModel = MessageModel.CLUSTERING,
         selectorExpression = "*", consumeMode = ConsumeMode.ORDERLY)
 public class CalculateSquareConsumerListener implements RocketMQListener<String> {
     @Override
@@ -18,5 +19,6 @@ public class CalculateSquareConsumerListener implements RocketMQListener<String>
         log.info("mq接收消息：{}", integer);
         //int i = integer * integer;
         //System.out.println(i);
+        //throw new NullPointerException();
     }
 }

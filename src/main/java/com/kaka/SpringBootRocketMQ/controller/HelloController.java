@@ -1,5 +1,7 @@
 package com.kaka.SpringBootRocketMQ.controller;
 
+import com.kaka.SpringBootRocketMQ.common.Constant;
+import com.kaka.SpringBootRocketMQ.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -22,6 +24,8 @@ public class HelloController {
 
     @Resource
     private RocketMQTemplate rocketMQTemplate;
+    @Resource
+    private OrderService orderService;
 
     @RequestMapping(value = "/syncSend", method = RequestMethod.GET)
     @ResponseBody
@@ -29,7 +33,7 @@ public class HelloController {
         Integer integer = 2;
         try {
             //发送一个同步消息，会返回值 ---发送到 calSquareTopic 主题
-            SendResult sendResult = rocketMQTemplate.syncSend("calSquareTopic", integer);
+            SendResult sendResult = rocketMQTemplate.syncSend(Constant.DEFAULT_TOP, integer);
             log.info("同步消息发送返回结果:{}", sendResult);
         } catch (Exception e) {
             log.error("{}", e.getStackTrace());
@@ -39,10 +43,10 @@ public class HelloController {
 
     @RequestMapping(value = "/send", method = RequestMethod.GET)
     @ResponseBody
-    public String send() {
+    public String send(String str) {
         try {
-            String str = "4";
-            Message message = new Message("calSquareTopic", str, str.getBytes(StandardCharsets.UTF_8));
+            //Message message = new Message(Constant.DEFAULT_TOP, str, str.getBytes(StandardCharsets.UTF_8));
+            Message message = new Message(Constant.DEFAULT_TOP_1, str, str.getBytes(StandardCharsets.UTF_8));
             SendResult send = rocketMQTemplate.getProducer().send(message);
             log.info("消息发送返回结果{}", send);
         } catch (MQClientException e) {
@@ -53,6 +57,8 @@ public class HelloController {
             log.error("{}", e.getStackTrace());
         } catch (InterruptedException e) {
             log.error("{}", e.getStackTrace());
+        }catch (Exception e){
+            log.error("{}",e.getStackTrace());
         }
         return "SUCCESS";
     }
@@ -64,4 +70,18 @@ public class HelloController {
         log.info("同步消息发送返回结果:{}", result);
         return "SUCCESS";
     }
+
+    @RequestMapping(value = "/createOrder", method = RequestMethod.GET)
+    @ResponseBody
+    public String createOrder(String orderNo) {
+        try {
+            orderService.createOrder(orderNo);
+        } catch (MQClientException e) {
+            log.error("创建订单MQ报错:{},{}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("创建订单报错:{},{}", e.getMessage(), e);
+        }
+        return "SUCCESS";
+    }
+
 }
